@@ -13,7 +13,7 @@ player1_color = '#0492CF'
 player2_color = '#EE4035'
 dot_width = 0.25 * board_size / dots_in_row
 edge_width = 0.1 * board_size / dots_in_row
-distance_between_dots = board_size / dots_in_row
+distance = board_size / dots_in_row
 
 
 class Dots:
@@ -40,18 +40,18 @@ class Dots:
 
     def refresh_board(self):
         for i in range(dots_in_row):
-            x = i * distance_between_dots + distance_between_dots / 2
-            self.canvas.create_line(x, distance_between_dots / 2, x,
-                                    board_size - distance_between_dots / 2,
+            x = i * distance + distance / 2
+            self.canvas.create_line(x, distance / 2, x,
+                                    board_size - distance / 2,
                                     fill='gray', dash=(2, 2))
-            self.canvas.create_line(distance_between_dots / 2, x,
-                                    board_size - distance_between_dots / 2, x,
+            self.canvas.create_line(distance / 2, x,
+                                    board_size - distance / 2, x,
                                     fill='gray', dash=(2, 2))
 
         for i in range(dots_in_row):
             for j in range(dots_in_row):
-                start_x = i * distance_between_dots + distance_between_dots / 2
-                end_x = j * distance_between_dots + distance_between_dots / 2
+                start_x = i * distance + distance / 2
+                end_x = j * distance + distance / 2
                 self.canvas.create_oval(start_x - dot_width / 2, end_x - dot_width / 2, start_x + dot_width / 2,
                                         end_x + dot_width / 2, fill=dot_color,
                                         outline=dot_color)
@@ -66,11 +66,11 @@ class Dots:
             grid_y = (event.y - 50) // 100 + (event.y - 50) % 100 // 50
             grid_x = (event.x - 50) // 100 + (event.x - 50) % 100 // 50
             if self.grid[grid_y][grid_x] == -1:
-                self.update_board(grid_x, grid_y)
+                self.update_dots(grid_x, grid_y)
 
-    def update_board(self, x, y):
-        start_x = x * distance_between_dots + distance_between_dots / 2
-        start_y = y * distance_between_dots + distance_between_dots / 2
+    def update_dots(self, x, y):
+        start_x = x * distance + distance / 2
+        start_y = y * distance + distance / 2
         color = player1_color
         if self.player2_move:
             color = player2_color
@@ -78,6 +78,27 @@ class Dots:
                                 start_y + dot_width / 2, fill=color, outline=color)
         self.grid[y][x] = int(self.player2_move)
         self.player2_move = not self.player2_move
+        self.update_cells(x, y, color)
+
+    def update_cells(self, x, y, color):
+        if x < dots_in_row - 1 and y < dots_in_row - 1:
+            if self.grid[y][x] == self.grid[y + 1][x + 1] == self.grid[y][x + 1] == self.grid[y + 1][x]:
+                self.draw_cell(x, y, color)
+        if x < dots_in_row - 1 and y > 0:
+            if self.grid[y][x] == self.grid[y - 1][x + 1] == self.grid[y][x + 1] == self.grid[y - 1][x]:
+                self.draw_cell(x, y - 1, color)
+        if x > 0 and y > 0:
+            if self.grid[y][x] == self.grid[y - 1][x - 1] == self.grid[y][x - 1] == self.grid[y - 1][x]:
+                self.draw_cell(x - 1, y - 1, color)
+        if x > 0 and y < dots_in_row - 1:
+            if self.grid[y][x] == self.grid[y + 1][x - 1] == self.grid[y][x - 1] == self.grid[y + 1][x]:
+                self.draw_cell(x - 1, y, color)
+
+    def draw_cell(self, x, y, color):
+        start_x = x * distance + distance / 2
+        start_y = y * distance + distance / 2
+        self.canvas.create_rectangle(start_x, start_y, start_x + distance, start_y + distance,
+                                     fill=color, outline=color)
 
 
 game_instance = Dots()
