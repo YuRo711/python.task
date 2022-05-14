@@ -2,6 +2,7 @@
 # https://github.com/aqeelanwar/Dots-and-Boxes/blob/17bc03559cba5007e7103d3f1889c478bb28b61b/main.py#L51
 
 from tkinter import *
+from Grid import Grid as Grid_Model
 import numpy as np
 
 board_size = 600
@@ -77,9 +78,27 @@ class Dots:
         self.canvas.create_oval(start_x - dot_width / 2, start_y - dot_width / 2, start_x + dot_width / 2,
                                 start_y + dot_width / 2, fill=color, outline=color)
         self.grid[y][x] = int(self.player2_move)
-        self.player2_move = not self.player2_move
-        self.update_cells(x, y, color)
 
+        # временный костыль
+        grid1 = Grid_Model(self.grid)
+        loops = grid1.loops(y, x)
+        for loop in loops:
+            self.canvas.create_polygon(self.screen_points_coords(loop.path), fill=color)
+
+        # не используется
+        '''
+        grid1.update(y, x)
+        if grid1.update_occurred:
+            for dot_x, dot_y in grid1.updated_points():
+                self.update_cells(dot_x, dot_y, color)
+                '''
+
+        #
+        self.player2_move = not self.player2_move
+        # self.update_cells(x, y, color)
+
+    # покрывается алгоритмами циклов
+    '''
     def update_cells(self, x, y, color):
         if x < dots_in_row - 1 and y < dots_in_row - 1:
             if self.grid[y][x] == self.grid[y + 1][x + 1] == self.grid[y][x + 1] == self.grid[y + 1][x]:
@@ -93,12 +112,25 @@ class Dots:
         if x > 0 and y < dots_in_row - 1:
             if self.grid[y][x] == self.grid[y + 1][x - 1] == self.grid[y][x - 1] == self.grid[y + 1][x]:
                 self.draw_cell(x - 1, y, color)
+    '''
 
     def draw_cell(self, x, y, color):
         start_x = x * distance + distance / 2
         start_y = y * distance + distance / 2
         self.canvas.create_rectangle(start_x, start_y, start_x + distance, start_y + distance,
                                      fill=color, outline=color)
+
+    @staticmethod
+    def screen_coord(grid_coord):
+        return grid_coord * distance + distance / 2
+
+    @staticmethod
+    def screen_coords(grid_numbers):
+        return [Dots.screen_coord(grid_numbers[i]) for i in range(len(grid_numbers))]
+
+    @staticmethod
+    def screen_points_coords(points):
+        return Dots.screen_coords([point[i] for point in points for i in range(1, -1, -1)])
 
 
 game_instance = Dots()
