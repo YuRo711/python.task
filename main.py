@@ -2,7 +2,7 @@
 # https://github.com/aqeelanwar/Dots-and-Boxes/blob/17bc03559cba5007e7103d3f1889c478bb28b61b/main.py#L51
 
 from tkinter import *
-from Grid import Grid as Grid_Model
+from Grid import Grid as GridModel
 import numpy as np
 
 board_size = 600
@@ -80,10 +80,12 @@ class Dots:
         self.grid[y][x] = int(self.player2_move)
 
         # временный костыль
-        grid1 = Grid_Model(self.grid)
+        grid1 = GridModel(self.grid)
         loops = grid1.loops(y, x)
         for loop in loops:
             self.canvas.create_polygon(self.screen_points_coords(loop.path), fill=color)
+        grid1.update(y, x)
+        self.grid = grid1.grid
 
         # не используется
         '''

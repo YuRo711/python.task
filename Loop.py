@@ -1,10 +1,9 @@
+from Grid import *
+
+
 class Loop:
     def __init__(self, path):
         self.path = path
-        self.points_by_line = self.make_dict_points_by_line()
-        self.opening_boundary_points_by_line = dict()
-        self.closing_boundary_points_by_line = dict()
-        #self.fill_boundary_points()
 
     @property
     def edges(self):
@@ -13,32 +12,28 @@ class Loop:
             edges.append([self.path[i], self.path[i + 1]])
         return edges
 
-    # лажа
-    def fill_boundary_points(self):
-        for line, points in self.points_by_line.items():
-            points.sort()
-            self.opening_boundary_points_by_line[line] += [points[i] for i in range(0, len(points), 2)]
-            self.closing_boundary_points_by_line[line] += [points[i] for i in range(1, len(points), 2)]
+    def is_point_inside(self, point):
+        polygon = self.path
+        outer_point = [-1, -1]
+        connecting_segment = [outer_point, point]
+        intersections_counter = 0
+        for i in range(len(polygon) - 1):
+            segment = [polygon[i], polygon[i+1]]
+            intersections_counter += int(self.are_crossed(segment, connecting_segment))
+        return intersections_counter % 2 == 1
 
-    def make_dict_points_by_line(self):
-        points_by_line = dict()
-        for point in self.path:
-            line, cell = point
-            if line not in points_by_line.keys():
-                points_by_line[line] = []
-            points_by_line[line].append(cell)
-        return points_by_line
+    def are_crossed(self, segment1, segment2):
+        line1 = self.line(*segment1)
+        line2 = self.line(*segment2)
+        return line1(segment2[0]) * line1(segment2[1]) < 0\
+            and line2(segment1[0]) * line2(segment1[1]) < 0
 
-    @property
-    def filling_points(self):
-        points = set()
-        for line in self.opening_boundary_points_by_line.keys():
-            quantity = len(self.opening_boundary_points_by_line[line])
-            for i in range(quantity):
-                for j in range(self.opening_boundary_points_by_line[line][i],
-                               self.closing_boundary_points_by_line[line][i] + 1):
-                    points.add(self.node(line, j))
-        return points
+    @staticmethod
+    def line(point1, point2):
+        dx = point2[0] - point1[0]
+        dy = point2[1] - point1[1]
+        a, b = dy, -dx
+        return lambda point: a*(point[0] - point1[0]) + b*(point[1] - point1[1])
 
     @staticmethod
     def node(x, y):

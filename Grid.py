@@ -1,4 +1,4 @@
-from Graph import Graph
+from Graph import *
 
 
 class Grid:
@@ -9,10 +9,22 @@ class Grid:
         self.height = len(grid)
         self.width = len(grid[0])
         self.graph = Graph(self)
-        # не работает
-        self.update_occurred = False
-        self.updated_points = set()
-        #
+
+    def update(self, line, cell):
+        color = self.grid[line][cell]
+        for i, j in self.filling_points(line, cell):
+            self.grid[i][j] = color
+
+    def filling_points(self, line, cell):
+        points = []
+        loops = self.loops(line, cell)
+        for i in range(self.height):
+            for j in range(self.width):
+                for loop in loops:
+                    point = self.node(i, j)
+                    if loop.is_point_inside(point):
+                        points.append(self.node(i, j))
+        return points
 
     def loops(self, line, cell):
         loops = self.graph.find_loops(self.node(line, cell))
@@ -42,8 +54,15 @@ class Grid:
     def node(x, y):
         return tuple([x, y])
 
+
+
+
+
+
+
     # не работает
-    def update(self, x, y):
+
+    def update0(self, x, y):
         loops = self.loops(x, y)
         filling_points = self.filling_points(loops)
         color_value = self.grid[x][y]
@@ -56,9 +75,25 @@ class Grid:
             self.graph = Graph(self)
 
     @staticmethod
-    def filling_points(loops):
+    def filling_points_0(loops):
         points = set()
         for loop in loops:
             points.union(loop.filling_points)
         return points
     #
+    # не надо
+
+    def find_point_outside_polygon(self, point, polygon):
+        for contour_point in self.contour:
+            if contour_point not in polygon:
+                return contour_point
+        else:
+            return None
+
+    @property
+    def contour(self):
+        contour = [[0, j] for j in range(self.width)] \
+                  + [[i, self.width - 1] for i in range(self.height)] \
+                  + [[self.height - 1, j] for j in range(self.width, -1, -1)] \
+                  + [[i, 0] for i in range(self.height, -1, -1)]
+        return contour

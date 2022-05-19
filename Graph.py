@@ -1,4 +1,4 @@
-from Loop import Loop
+from Loop import *
 
 
 class Graph:
