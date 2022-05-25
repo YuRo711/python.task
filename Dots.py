@@ -15,6 +15,7 @@ player2_color = '#EE4035'
 dot_width = 0.25 * board_size / dots_in_row
 edge_width = 0.1 * board_size / dots_in_row
 distance = board_size / dots_in_row
+font = ('Helvetica', 16)
 
 
 class Dots:
@@ -24,11 +25,16 @@ class Dots:
     def __init__(self):
         self.window = Tk()
         self.window.title('Dots')
-        self.canvas = Canvas(self.window, width=board_size, height=board_size)
+        self.canvas = Canvas(self.window, width=board_size + 200, height=board_size)
         self.canvas.pack()
         self.window.bind('<Button-1>', self.click)
         self.grid_model = GridModel([[-1] * dots_in_row for i in range(dots_in_row)])
         self.player2_move = False
+        self.score1 = 0
+        self.score2 = 0
+        self.move_info = self.canvas.create_text(0, 0)
+        self.score1_info = self.canvas.create_text(0, 0)
+        self.score2_info = self.canvas.create_text(0, 0)
         self.new_game()
 
     @property
@@ -42,6 +48,7 @@ class Dots:
         self.player2_move = False
         self.grid_model = GridModel([[-1] * dots_in_row for i in range(dots_in_row)])
         self.refresh_board()
+        self.update_info()
 
     def refresh_board(self):
         for i in range(dots_in_row):
@@ -61,6 +68,9 @@ class Dots:
                                         end_x + dot_width / 2, fill=dot_color,
                                         outline=dot_color)
 
+        self.canvas.create_text(board_size + 20, 50, text='Ходит:', fill='black', font=font)
+        self.canvas.create_text(board_size + 10, 100, text='Счёт', fill='black', font=font)
+
     # Функционал игры
 
     def click(self, event):
@@ -76,9 +86,7 @@ class Dots:
     def update_dots(self, x, y):
         start_x = x * distance + distance / 2
         start_y = y * distance + distance / 2
-        color = player1_color
-        if self.player2_move:
-            color = player2_color
+        color = player1_color if self.player2_move else player2_color
         self.canvas.create_oval(start_x - dot_width / 2, start_y - dot_width / 2, start_x + dot_width / 2,
                                 start_y + dot_width / 2, fill=color, outline=color)
 
@@ -86,26 +94,23 @@ class Dots:
         self.grid_model.update(y, x)
         loops = self.grid_model.last_step_loops
         for loop in loops:
-            self.canvas.create_polygon(self.screen_points_cords(loop.path), fill=color)
-
+            self.canvas.create_polygon(self.screen_points_coords(loop.path), fill=color)
+        grid1.update(y, x)
+        self.grid = grid1.grid
         self.player2_move = not self.player2_move
+        self.update_info()
 
-    # покрывается алгоритмами циклов
-    '''
-    def update_cells(self, x, y, color):
-        if x < dots_in_row - 1 and y < dots_in_row - 1:
-            if self.grid[y][x] == self.grid[y + 1][x + 1] == self.grid[y][x + 1] == self.grid[y + 1][x]:
-                self.draw_cell(x, y, color)
-        if x < dots_in_row - 1 and y > 0:
-            if self.grid[y][x] == self.grid[y - 1][x + 1] == self.grid[y][x + 1] == self.grid[y - 1][x]:
-                self.draw_cell(x, y - 1, color)
-        if x > 0 and y > 0:
-            if self.grid[y][x] == self.grid[y - 1][x - 1] == self.grid[y][x - 1] == self.grid[y - 1][x]:
-                self.draw_cell(x - 1, y - 1, color)
-        if x > 0 and y < dots_in_row - 1:
-            if self.grid[y][x] == self.grid[y + 1][x - 1] == self.grid[y][x - 1] == self.grid[y + 1][x]:
-                self.draw_cell(x - 1, y, color)
-    '''
+    def update_info(self):
+        self.canvas.delete(self.move_info)
+        self.canvas.delete(self.score1_info)
+        self.canvas.delete(self.score2_info)
+        color = player1_color if self.player2_move else player2_color
+        player = "Игрок 2" if self.player2_move else "Игрок 1"
+        self.move_info = self.canvas.create_text(board_size + 100, 50, text=player, fill=color, font=font)
+        self.score1_info = self.canvas.create_text(board_size + 35, 130, text="Игрок 1: " + str(self.score1),
+                                                   fill=player1_color, font=font)
+        self.score2_info = self.canvas.create_text(board_size + 35, 160, text="Игрок 2: " + str(self.score2),
+                                                   fill=player2_color, font=font)
 
     def draw_cell(self, x, y, color):
         start_x = x * distance + distance / 2
