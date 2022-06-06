@@ -1,4 +1,4 @@
-from Grid import *
+from GridModel import *
 
 
 class Loop:

@@ -1,5 +1,5 @@
 import unittest
-from Grid import *
+from GridModel import *
 
 
 class GridTestMethods(unittest.TestCase):
@@ -8,7 +8,7 @@ class GridTestMethods(unittest.TestCase):
         g = [[-1, 0, -1],
              [0, 1, 0],
              [-1, 0, -1]]
-        grid = Grid(g)
+        grid = GridModel(g)
         grid.update(0, 1)
         new_grid = \
             [[-1, 0, -1],

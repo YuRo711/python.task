@@ -2,15 +2,15 @@ from Loop import *
 
 
 class Graph:
-    def __init__(self, grid):
-        self.graph = Graph.convert_grid_to_graph(grid)
+    def __init__(self, grid_model):
+        self.graph = Graph.convert_grid_to_graph(grid_model)
 
     @staticmethod
-    def convert_grid_to_graph(grid):
+    def convert_grid_to_graph(grid_model):
         adjoining_nodes = dict()
-        for i in range(grid.height):
-            for j in range(grid.width):
-                adjoining_nodes[Graph.node(i, j)] = grid.get_adjoining_nodes(i, j)
+        for i in range(grid_model.height):
+            for j in range(grid_model.width):
+                adjoining_nodes[Graph.node(i, j)] = grid_model.get_adjoining_nodes(i, j)
         return adjoining_nodes
 
     def find_paths(self, start, stop, visited):

@@ -2,7 +2,7 @@
 # https://github.com/aqeelanwar/Dots-and-Boxes/blob/17bc03559cba5007e7103d3f1889c478bb28b61b/main.py#L51
 
 from tkinter import *
-from Grid import Grid as GridModel
+from GridModel import *
 import numpy as np
 
 board_size = 600
@@ -27,16 +27,20 @@ class Dots:
         self.canvas = Canvas(self.window, width=board_size, height=board_size)
         self.canvas.pack()
         self.window.bind('<Button-1>', self.click)
-        self.grid = [[-1] * dots_in_row for i in range(dots_in_row)]
+        self.grid_model = GridModel([[-1] * dots_in_row for i in range(dots_in_row)])
         self.player2_move = False
         self.new_game()
+
+    @property
+    def grid(self):
+        return self.grid_model.grid
 
     def mainloop(self):
         self.window.mainloop()
 
     def new_game(self):
         self.player2_move = False
-        self.grid = [[-1] * dots_in_row for i in range(dots_in_row)]
+        self.grid_model = GridModel([[-1] * dots_in_row for i in range(dots_in_row)])
         self.refresh_board()
 
     def refresh_board(self):
@@ -77,27 +81,14 @@ class Dots:
             color = player2_color
         self.canvas.create_oval(start_x - dot_width / 2, start_y - dot_width / 2, start_x + dot_width / 2,
                                 start_y + dot_width / 2, fill=color, outline=color)
-        self.grid[y][x] = int(self.player2_move)
 
-        # временный костыль
-        grid1 = GridModel(self.grid)
-        loops = grid1.loops(y, x)
+        self.grid_model.grid[y][x] = int(self.player2_move)
+        self.grid_model.update(y, x)
+        loops = self.grid_model.last_step_loops
         for loop in loops:
-            self.canvas.create_polygon(self.screen_points_coords(loop.path), fill=color)
-        grid1.update(y, x)
-        self.grid = grid1.grid
+            self.canvas.create_polygon(self.screen_points_cords(loop.path), fill=color)
 
-        # не используется
-        '''
-        grid1.update(y, x)
-        if grid1.update_occurred:
-            for dot_x, dot_y in grid1.updated_points():
-                self.update_cells(dot_x, dot_y, color)
-                '''
-
-        #
         self.player2_move = not self.player2_move
-        # self.update_cells(x, y, color)
 
     # покрывается алгоритмами циклов
     '''
@@ -127,12 +118,12 @@ class Dots:
         return grid_coord * distance + distance / 2
 
     @staticmethod
-    def screen_coords(grid_numbers):
+    def screen_cords(grid_numbers):
         return [Dots.screen_coord(grid_numbers[i]) for i in range(len(grid_numbers))]
 
     @staticmethod
-    def screen_points_coords(points):
-        return Dots.screen_coords([point[i] for point in points for i in range(1, -1, -1)])
+    def screen_points_cords(points):
+        return Dots.screen_cords([point[i] for point in points for i in range(1, -1, -1)])
 
 
 game_instance = Dots()
