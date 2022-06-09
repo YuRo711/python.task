@@ -30,8 +30,6 @@ class Dots:
         self.window.bind('<Button-1>', self.click)
         self.grid_model = GridModel([[-1] * dots_in_row for i in range(dots_in_row)])
         self.player2_move = False
-        self.score1 = 0
-        self.score2 = 0
         self.move_info = self.canvas.create_text(0, 0)
         self.score1_info = self.canvas.create_text(0, 0)
         self.score2_info = self.canvas.create_text(0, 0)
@@ -41,12 +39,22 @@ class Dots:
     def grid(self):
         return self.grid_model.grid
 
+    @property
+    def score1(self):
+        score = self.grid_model.count_points(GridModel.Colors.player1)
+        return score
+
+    @property
+    def score2(self):
+        score = self.grid_model.count_points(GridModel.Colors.player2)
+        return score
+
     def mainloop(self):
         self.window.mainloop()
 
     def new_game(self):
         self.player2_move = False
-        self.grid_model = GridModel([[-1] * dots_in_row for i in range(dots_in_row)])
+        self.grid_model = GridModel([[GridModel.Colors.default] * dots_in_row for i in range(dots_in_row)])
         self.refresh_board()
         self.update_info()
 
@@ -80,23 +88,22 @@ class Dots:
                 (dot_width >= event_y or event_y >= 100 - dot_width):
             grid_y = (event.y - 50) // 100 + (event.y - 50) % 100 // 50
             grid_x = (event.x - 50) // 100 + (event.x - 50) % 100 // 50
-            if self.grid[grid_y][grid_x] == -1:
+            if self.grid[grid_y][grid_x] == GridModel.Colors.default:
                 self.update_dots(grid_x, grid_y)
 
     def update_dots(self, x, y):
         start_x = x * distance + distance / 2
         start_y = y * distance + distance / 2
-        color = player1_color if self.player2_move else player2_color
+        color = player2_color if self.player2_move else player1_color
         self.canvas.create_oval(start_x - dot_width / 2, start_y - dot_width / 2, start_x + dot_width / 2,
                                 start_y + dot_width / 2, fill=color, outline=color)
 
-        self.grid_model.grid[y][x] = int(self.player2_move)
+        self.grid_model.grid[y][x] = GridModel.Colors.player2 if self.player2_move else GridModel.Colors.player1
         self.grid_model.update(y, x)
         loops = self.grid_model.last_step_loops
         for loop in loops:
-            self.canvas.create_polygon(self.screen_points_coords(loop.path), fill=color)
-        grid1.update(y, x)
-        self.grid = grid1.grid
+            self.canvas.create_polygon(self.screen_points_cords(loop.path), fill=color)
+        self.grid_model.update(y, x)
         self.player2_move = not self.player2_move
         self.update_info()
 
@@ -104,7 +111,7 @@ class Dots:
         self.canvas.delete(self.move_info)
         self.canvas.delete(self.score1_info)
         self.canvas.delete(self.score2_info)
-        color = player1_color if self.player2_move else player2_color
+        color = player2_color if self.player2_move else player1_color
         player = "Игрок 2" if self.player2_move else "Игрок 1"
         self.move_info = self.canvas.create_text(board_size + 100, 50, text=player, fill=color, font=font)
         self.score1_info = self.canvas.create_text(board_size + 35, 130, text="Игрок 1: " + str(self.score1),

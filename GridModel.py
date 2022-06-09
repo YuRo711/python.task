@@ -13,13 +13,26 @@ class GridModel:
         self.grid = grid
         self.height = len(grid)
         self.width = len(grid[0])
-        # self.graph = Graph(self)
         self.last_changed_points_count = 0
         self.last_step_loops = []
+
+    @staticmethod
+    def from_int_grid(int_grid):
+        height = len(int_grid)
+        width = len(int_grid[0])
+        grid = [[GridModel.Colors.default] * width for i in range(height)]
+        for i in range(height):
+            for j in range(width):
+                grid[i][j] = GridModel.Colors(int_grid[i][j])
+        return GridModel(grid)
 
     @property
     def graph(self):
         return Graph(self)
+
+    def count_points(self, color):
+        result = sum(line.count(color) for line in self.grid)
+        return result
 
     def update(self, line, cell):
         color = self.grid[line][cell]
