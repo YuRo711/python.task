@@ -15,6 +15,7 @@ class GridModel:
         self.width = len(grid[0])
         self.last_changed_points_count = 0
         self.last_step_loops = []
+        self.taken = {GridModel.Colors.player1: [], GridModel.Colors.player2: []}
 
     @staticmethod
     def from_int_grid(int_grid):
@@ -31,7 +32,8 @@ class GridModel:
         return Graph(self)
 
     def count_points(self, color):
-        result = sum(line.count(color) for line in self.grid)
+        #result = sum(line.count(color) for line in self.grid)
+        result = len(self.taken[color])
         return result
 
     def update(self, line, cell):
@@ -51,7 +53,14 @@ class GridModel:
             for j in range(self.width):
                 for loop in loops:
                     point = self.node(i, j)
+                    color = GridModel.Colors.default
+                    if self.grid[i][j] != -1:
+                        color = GridModel.Colors.player1 if self.grid[i][j] == 1 else GridModel.Colors.player2
                     if loop.is_point_inside(point):
+                        if color != GridModel.Colors.default:
+                            if not (point in self.taken[color]):
+                                self.taken[color].append(point)
+                                print(self.taken)
                         points.add(self.node(i, j))
         return points
 
