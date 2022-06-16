@@ -3,6 +3,7 @@
 
 from tkinter import *
 from GridModel import *
+from RandomAI import *
 
 dots_in_row = 6
 board_size = 600
@@ -33,7 +34,8 @@ class Dots:
         self.move_info = self.canvas.create_text(0, 0)
         self.score1_info = self.canvas.create_text(0, 0)
         self.score2_info = self.canvas.create_text(0, 0)
-        self.AI =
+        self.mp_mode = True
+        self.AI = RandomAI(self)
         self.new_game()
 
     @property
@@ -114,6 +116,9 @@ class Dots:
         self.grid_model.update(y, x)
         self.player2_move = not self.player2_move
         self.update_info()
+        if self.player2_move and not self.mp_mode:
+            self.AI.move()
+            self.player2_move = False
 
     def update_info(self):
         self.canvas.delete(self.move_info)

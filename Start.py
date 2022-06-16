@@ -43,8 +43,8 @@ class Start:
         self.size_text = self.canvas.create_text(300, 330, text=str(self.size), font=font)
 
     def size_minus(self):
-        self.size -= 3
-        if self.size == 0:
+        self.size -= 1
+        if self.size <= 2:
             self.size = 3
         self.canvas.delete(self.size_text)
         self.size_text = self.canvas.create_text(300, 330, text=str(self.size), font=font)

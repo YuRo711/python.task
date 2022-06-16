@@ -1,5 +1,6 @@
 from Graph import *
 from enum import Enum
+from RandomAI import *
 
 
 class GridModel:
@@ -37,6 +38,7 @@ class GridModel:
         return result
 
     def update(self, line, cell):
+        print(line, cell)
         color = self.grid[line][cell]
         self.last_changed_points_count = 0
         for i, j in self.filling_points(line, cell):
