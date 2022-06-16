@@ -29,12 +29,12 @@ class Dots:
         self.canvas = Canvas(self.window, width=self.board_size + 200, height=self.board_size)
         self.canvas.pack()
         self.window.bind('<Button-1>', self.click)
+        self.mp_mode = True
         self.grid_model = GridModel([[-1] * self.dots_in_row for i in range(self.dots_in_row)])
         self.player2_move = False
         self.move_info = self.canvas.create_text(0, 0)
         self.score1_info = self.canvas.create_text(0, 0)
         self.score2_info = self.canvas.create_text(0, 0)
-        self.mp_mode = True
         self.AI = RandomAI(self)
         self.new_game()
 
@@ -99,16 +99,17 @@ class Dots:
             grid_y = (event.y - 50) // 100 + (event.y - 50) % 100 // 50
             grid_x = (event.x - 50) // 100 + (event.x - 50) % 100 // 50
             if self.grid[grid_y][grid_x] == GridModel.Colors.default:
-                self.update_dots(grid_x, grid_y)
+                self.update_dots(grid_x, grid_y, self.player2_move)
 
-    def update_dots(self, x, y):
+    def update_dots(self, x, y, player2_move, load=False):
         start_x = x * distance + distance / 2
         start_y = y * distance + distance / 2
-        color = player2_color if self.player2_move else player1_color
+        color = player2_color if player2_move else player1_color
         self.canvas.create_oval(start_x - dot_width / 2, start_y - dot_width / 2, start_x + dot_width / 2,
                                 start_y + dot_width / 2, fill=color, outline=color)
-
-        self.grid_model.grid[y][x] = GridModel.Colors.player2 if self.player2_move else GridModel.Colors.player1
+        if load:
+            return
+        self.grid_model.grid[y][x] = GridModel.Colors.player2 if player2_move else GridModel.Colors.player1
         self.grid_model.update(y, x)
         loops = self.grid_model.last_step_loops
         for loop in loops:

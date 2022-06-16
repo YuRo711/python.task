@@ -11,7 +11,7 @@ class RandomAI:
         x, y = self.random()
         while self.game.grid_model.grid[y][x] != self.game.grid_model.Colors.default:
             x, y = self.random()
-        self.game.update_dots(x, y)
+        self.game.update_dots(x, y, True)
 
     def random(self):
         return random.randint(0, self.board_size - 1), random.randint(0, self.board_size - 1)

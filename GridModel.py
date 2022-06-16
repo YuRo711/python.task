@@ -1,6 +1,6 @@
 from Graph import *
 from enum import Enum
-from RandomAI import *
+from Logger import *
 
 
 class GridModel:
@@ -17,6 +17,8 @@ class GridModel:
         self.last_changed_points_count = 0
         self.last_step_loops = []
         self.taken = {GridModel.Colors.player1: [], GridModel.Colors.player2: []}
+        self.logger = Logger()
+        self.logger.write(self.grid)
 
     @staticmethod
     def from_int_grid(int_grid):
@@ -38,13 +40,13 @@ class GridModel:
         return result
 
     def update(self, line, cell):
-        print(line, cell)
         color = self.grid[line][cell]
         self.last_changed_points_count = 0
         for i, j in self.filling_points(line, cell):
             if self.grid[i][j] != color:
                 self.last_changed_points_count += 1
             self.grid[i][j] = color
+        self.logger.write(self.grid)
         # self.graph = Graph(self)
 
     def filling_points(self, line, cell):

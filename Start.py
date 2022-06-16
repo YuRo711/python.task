@@ -1,5 +1,7 @@
 from tkinter import *
 from Dots import *
+from Logger import *
+import os.path
 
 font = ('Helvetica', 15)
 
@@ -11,9 +13,11 @@ class Start:
         self.canvas = Canvas(self.window, width=500, height=500)
         self.canvas.pack()
         self.size = 6
-        load_btn = Button(self.window, text='Загрузить', width=20, height=1, bd='5', font=font,
-                          command=self.new_solo_game)
-        load_btn.place(x=120, y=70)
+        self.logger = Logger()
+        if os.path.isfile("log.txt"):
+            load_btn = Button(self.window, text='Загрузить', width=20, height=1, bd='5', font=font,
+                          command=self.load)
+            load_btn.place(x=120, y=70)
         solo_btn = Button(self.window, text='Новая одиночная игра', width=30, height=1, bd='5', font=font,
                           command=self.new_solo_game)
         solo_btn.place(x=65, y=170)
@@ -53,12 +57,28 @@ class Start:
         game_instance = Dots(self.size, self)
         self.window.destroy()
         game_instance.mp_mode = False
+        game_instance.grid_model.logger.mp_mode = False
         game_instance.mainloop()
 
     def new_multi_game(self):
         game_instance = Dots(self.size, self)
         self.window.destroy()
         game_instance.mp_mode = True
+        game_instance.grid_model.logger.mp_mode = True
+        game_instance.mainloop()
+
+    def load(self):
+        state, mp_mode = self.logger.read(open("log.txt", "r"))
+        size = len(state) - 1
+        game_instance = Dots(size, self)
+        self.window.destroy()
+        game_instance.mp_mode = mp_mode
+        game_instance.grid_model.logger.mp_mode = mp_mode
+        game_instance.grid_model.grid = state
+        for y in range(size):
+            for x in range(size):
+                if state[y + 1][x] != -1:
+                    game_instance.update_dots(x, y, state[y + 1][x] == 2, True)
         game_instance.mainloop()
 
     def restart(self):
