@@ -159,7 +159,7 @@ class Dots:
         log = open("prev.txt", "r")
         if not self.mp_mode:
             log = open("prev2.txt.txt", "r")
-        state, mp_mode = self.grid_model.logger.read(log)
+        state, mp_mode, player2_move = self.grid_model.logger.read(log)
         size = len(state) - 2
         game_instance = Dots(size, self.start_window)
         self.window.destroy()
