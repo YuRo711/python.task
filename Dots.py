@@ -4,6 +4,7 @@
 from tkinter import *
 from GridModel import *
 from RandomAI import *
+from GameOver import *
 
 dots_in_row = 6
 board_size = 600
@@ -125,6 +126,7 @@ class Dots:
             self.canvas.create_polygon(self.screen_points_cords(loop.path), fill=color)
         self.player2_move = not self.player2_move
         self.update_info()
+        self.game_over_check()
         if self.player2_move and not self.mp_mode:
             self.AI.move()
             self.player2_move = False
@@ -145,6 +147,7 @@ class Dots:
         self.undo_btn = Button(self.window, text='Отмена', width=10, height=1, bd='5', font=font,
                                command=self.undo)
         self.undo_btn.place(x=self.board_size, y=200)
+        self.game_over_check()
 
     def draw_cell(self, x, y, color):
         start_x = x * distance + distance / 2
@@ -173,6 +176,19 @@ class Dots:
         game_instance.undo_btn.place(x=game_instance.board_size, y=200)
         game_instance.player2_move = not self.player2_move
         game_instance.mainloop()
+
+    def game_over_check(self):
+        for line in self.grid:
+            for cell in line:
+                if cell == GridModel.Colors.default or cell == -1:
+                    return
+        self.window.destroy()
+        winner = 0
+        if self.score2 > self.score1:
+            winner = 2
+        elif self.score2 < self.score1:
+            winner = 1
+        game_over = GameOver(self.start_window, winner)
 
     @staticmethod
     def screen_coord(grid_coord):
