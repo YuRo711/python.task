@@ -64,7 +64,6 @@ class GridModel:
                         if color != GridModel.Colors.default:
                             if not (point in self.taken[color]):
                                 self.taken[color].append(point)
-                                print(self.taken)
                         points.add(self.node(i, j))
         return points
 

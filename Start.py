@@ -58,6 +58,7 @@ class Start:
         self.window.destroy()
         game_instance.mp_mode = False
         game_instance.grid_model.logger.mp_mode = False
+        self.clear_logs()
         game_instance.mainloop()
 
     def new_multi_game(self):
@@ -65,21 +66,32 @@ class Start:
         self.window.destroy()
         game_instance.mp_mode = True
         game_instance.grid_model.logger.mp_mode = True
+        self.clear_logs()
         game_instance.mainloop()
 
     def load(self):
-        state, mp_mode = self.logger.read(open("log.txt", "r"))
-        size = len(state) - 1
+        state, mp_mode, player2_move = self.logger.read(open("log.txt", "r"))
+        size = len(state) - 2
         game_instance = Dots(size, self)
         self.window.destroy()
         game_instance.mp_mode = mp_mode
+        game_instance.player2_move = player2_move
         game_instance.grid_model.logger.mp_mode = mp_mode
-        game_instance.grid_model.grid = state
+        game_instance.grid_model.grid = state[1::]
         for y in range(size):
             for x in range(size):
-                if state[y + 1][x] != -1:
-                    game_instance.update_dots(x, y, state[y + 1][x] == 2, True)
+                if state[y + 2][x] != -1:
+                    game_instance.update_dots(x, y, state[y + 2][x] == 2, True)
         game_instance.mainloop()
+
+    @staticmethod
+    def clear_logs():
+        if os.path.isfile("log.txt"):
+            os.remove("log.txt")
+        if os.path.isfile("prev.txt"):
+            os.remove("prev.txt")
+        if os.path.isfile("prev2.txt"):
+            os.remove("prev2.txt")
 
     def restart(self):
         self.__init__()

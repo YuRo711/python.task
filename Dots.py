@@ -36,6 +36,9 @@ class Dots:
         self.score1_info = self.canvas.create_text(0, 0)
         self.score2_info = self.canvas.create_text(0, 0)
         self.AI = RandomAI(self)
+        self.undo_btn = Button(self.window, text='Отмена', width=10, height=1, bd='5', font=font,
+                               command=self.undo, state=DISABLED)
+        self.undo_btn.place(x=self.board_size, y=200)
         self.new_game()
 
     @property
@@ -92,16 +95,21 @@ class Dots:
     # Функционал игры
 
     def click(self, event):
+        print(event.x, event.y)
         event_x = (event.x - 50) % 100
         event_y = (event.y - 50) % 100
         if (dot_width >= event_x or event_x >= 100 - dot_width) and \
                 (dot_width >= event_y or event_y >= 100 - dot_width):
             grid_y = (event.y - 50) // 100 + (event.y - 50) % 100 // 50
             grid_x = (event.x - 50) // 100 + (event.x - 50) % 100 // 50
-            if self.grid[grid_y][grid_x] == GridModel.Colors.default:
-                self.update_dots(grid_x, grid_y, self.player2_move)
+            if grid_x < dots_in_row and grid_y < dots_in_row:
+                print(self.grid[grid_y][grid_x])
+                if self.grid[grid_y][grid_x] == GridModel.Colors.default or self.grid[grid_y][grid_x] == -1:
+                    print("!")
+                    self.update_dots(grid_x, grid_y, self.player2_move)
 
     def update_dots(self, x, y, player2_move, load=False):
+        print("1")
         start_x = x * distance + distance / 2
         start_y = y * distance + distance / 2
         color = player2_color if player2_move else player1_color
@@ -109,17 +117,18 @@ class Dots:
                                 start_y + dot_width / 2, fill=color, outline=color)
         if load:
             return
+        print("2")
         self.grid_model.grid[y][x] = GridModel.Colors.player2 if player2_move else GridModel.Colors.player1
         self.grid_model.update(y, x)
         loops = self.grid_model.last_step_loops
         for loop in loops:
             self.canvas.create_polygon(self.screen_points_cords(loop.path), fill=color)
-        self.grid_model.update(y, x)
         self.player2_move = not self.player2_move
         self.update_info()
         if self.player2_move and not self.mp_mode:
             self.AI.move()
             self.player2_move = False
+        print("3")
 
     def update_info(self):
         self.canvas.delete(self.move_info)
@@ -132,12 +141,38 @@ class Dots:
                                                    fill=player1_color, font=font)
         self.score2_info = self.canvas.create_text(self.board_size + 35, 160, text="Игрок 2: " + str(self.score2),
                                                    fill=player2_color, font=font)
+        self.undo_btn.destroy()
+        self.undo_btn = Button(self.window, text='Отмена', width=10, height=1, bd='5', font=font,
+                               command=self.undo)
+        self.undo_btn.place(x=self.board_size, y=200)
 
     def draw_cell(self, x, y, color):
         start_x = x * distance + distance / 2
         start_y = y * distance + distance / 2
         self.canvas.create_rectangle(start_x, start_y, start_x + distance, start_y + distance,
                                      fill=color, outline=color)
+
+    def undo(self):
+        log = open("prev.txt", "r")
+        if not self.mp_mode:
+            log = open("prev2.txt.txt", "r")
+        state, mp_mode = self.grid_model.logger.read(log)
+        size = len(state) - 2
+        game_instance = Dots(size, self.start_window)
+        self.window.destroy()
+        game_instance.mp_mode = mp_mode
+        game_instance.grid_model.logger.mp_mode = mp_mode
+        game_instance.grid_model.grid = state[1::]
+        for y in range(size):
+            for x in range(size):
+                if state[y + 2][x] != -1:
+                    game_instance.update_dots(x, y, state[y + 2][x] == 2, True)
+        game_instance.undo_btn.destroy()
+        game_instance.undo_btn = Button(game_instance.window, text='Отмена', width=10, height=1, bd='5', font=font,
+                                        command=game_instance.undo, state=DISABLED)
+        game_instance.undo_btn.place(x=game_instance.board_size, y=200)
+        game_instance.player2_move = not self.player2_move
+        game_instance.mainloop()
 
     @staticmethod
     def screen_coord(grid_coord):
