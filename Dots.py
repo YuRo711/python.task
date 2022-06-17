@@ -5,6 +5,7 @@ from tkinter import *
 from GridModel import *
 from RandomAI import *
 from GameOver import *
+from Records import *
 from Logger import *
 
 dots_in_row = 6
@@ -86,6 +87,9 @@ class Dots:
 
         self.canvas.create_text(self.board_size + 20, 50, text='Ходит:', fill='black', font=font)
         self.canvas.create_text(self.board_size + 10, 100, text='Счёт', fill='black', font=font)
+        end_btn = Button(self.window, text='Завершить', width=10, height=1, bd='5', font=font,
+                             command=self.game_over)
+        end_btn.place(x=self.board_size, y=self.board_size - 180)
         restart_btn = Button(self.window, text='Заново', width=10, height=1, bd='5', font=font,
                              command=self.restart)
         restart_btn.place(x=self.board_size, y=self.board_size - 100)
@@ -188,13 +192,16 @@ class Dots:
             for cell in line:
                 if cell == GridModel.Colors.default or cell == -1:
                     return
+        self.game_over()
+
+    def game_over(self):
         self.window.destroy()
-        winner = 0
         if self.score2 > self.score1:
-            winner = 2
+            game_over = GameOver(self.start_window, 2, self.score2)
         elif self.score2 < self.score1:
-            winner = 1
-        game_over = GameOver(self.start_window, winner)
+            game_over = GameOver(self.start_window, 1, self.score1)
+        else:
+            game_over = GameOver(self.start_window, 0)
 
     @staticmethod
     def screen_coord(grid_coord):

@@ -1,6 +1,7 @@
 from tkinter import *
 from Dots import *
 from Logger import *
+from Records import *
 import os.path
 
 font = ('Helvetica', 15)
@@ -10,7 +11,7 @@ class Start:
     def __init__(self):
         self.window = Tk()
         self.window.title('Dots')
-        self.canvas = Canvas(self.window, width=500, height=500)
+        self.canvas = Canvas(self.window, width=500, height=550)
         self.canvas.pack()
         self.size = 6
         self.logger = Logger()
@@ -34,9 +35,12 @@ class Start:
                           command=self.size_plus)
         plus_btn.place(x=350, y=310)
 
+        record_btn = Button(self.window, text='Таблица рекордов', width=30, height=1, bd='5', font=font,
+                            command=self.records)
+        record_btn.place(x=65, y=420)
         exit_btn = Button(self.window, text='Выход', width=20, height=1, bd='5', font=font,
                           command=quit)
-        exit_btn.place(x=120, y=440)
+        exit_btn.place(x=120, y=490)
 
     def mainloop(self):
         self.window.mainloop()
@@ -80,12 +84,17 @@ class Start:
         grid_model.logger.mp_mode = mp_mode
         grid_model.grid = state
         grid_model.last_step_loops = loops
-        grid_model.logger.write(grid_model.grid, grid_model.last_step_loops)
+        grid_model.logger.write(grid_model.grid, grid_model.total_loops)
         for y in range(size):
             for x in range(size):
                 if state[y][x] != -1:
                     game_instance.update_dots(x, y, state[y][x] == 2, True)
         game_instance.mainloop()
+
+    def records(self):
+        rec_instance = Records(self)
+        self.window.destroy()
+        rec_instance.mainloop()
 
     @staticmethod
     def clear_logs():
