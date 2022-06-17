@@ -5,6 +5,7 @@ from tkinter import *
 from GridModel import *
 from RandomAI import *
 from GameOver import *
+from Logger import *
 
 dots_in_row = 6
 board_size = 600
@@ -110,7 +111,7 @@ class Dots:
                     self.update_dots(grid_x, grid_y, self.player2_move)
 
     def update_dots(self, x, y, player2_move, load=False):
-        print("1")
+        print("1:", x, y)
         start_x = x * distance + distance / 2
         start_y = y * distance + distance / 2
         color = player2_color if player2_move else player1_color
@@ -156,20 +157,25 @@ class Dots:
                                      fill=color, outline=color)
 
     def undo(self):
-        log = open("prev.txt", "r")
+        self.grid_model.logger.rewrite("log.txt", "prev.txt")
+        self.grid_model.logger.rewrite("prev.txt", "prev2.txt")
+        log = open("log.txt", "r")
         if not self.mp_mode:
-            log = open("prev2.txt.txt", "r")
-        state, mp_mode, player2_move = self.grid_model.logger.read(log)
-        size = len(state) - 2
+            log = open("prev.txt", "r")
+        state, mp_mode, player2_move, loops = self.grid_model.logger.read(log)
+        size = len(state)
         game_instance = Dots(size, self.start_window)
         self.window.destroy()
         game_instance.mp_mode = mp_mode
-        game_instance.grid_model.logger.mp_mode = mp_mode
-        game_instance.grid_model.grid = state[1::]
+        grid_model = game_instance.grid_model
+        grid_model.logger.mp_mode = mp_mode
+        grid_model.grid = state
+        grid_model.last_step_loops = loops
+        grid_model.logger.write(grid_model.grid, grid_model.last_step_loops)
         for y in range(size):
             for x in range(size):
-                if state[y + 2][x] != -1:
-                    game_instance.update_dots(x, y, state[y + 2][x] == 2, True)
+                if state[y][x] != -1:
+                    game_instance.update_dots(x, y, state[y][x] == 2, True)
         game_instance.undo_btn.destroy()
         game_instance.undo_btn = Button(game_instance.window, text='Отмена', width=10, height=1, bd='5', font=font,
                                         command=game_instance.undo, state=DISABLED)

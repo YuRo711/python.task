@@ -70,18 +70,21 @@ class Start:
         game_instance.mainloop()
 
     def load(self):
-        state, mp_mode, player2_move = self.logger.read(open("log.txt", "r"))
-        size = len(state) - 2
+        state, mp_mode, player2_move, loops = self.logger.read(open("log.txt", "r"))
+        size = len(state)
         game_instance = Dots(size, self)
         self.window.destroy()
         game_instance.mp_mode = mp_mode
         game_instance.player2_move = player2_move
-        game_instance.grid_model.logger.mp_mode = mp_mode
-        game_instance.grid_model.grid = state[1::]
+        grid_model = game_instance.grid_model
+        grid_model.logger.mp_mode = mp_mode
+        grid_model.grid = state
+        grid_model.last_step_loops = loops
+        grid_model.logger.write(grid_model.grid, grid_model.last_step_loops)
         for y in range(size):
             for x in range(size):
-                if state[y + 2][x] != -1:
-                    game_instance.update_dots(x, y, state[y + 2][x] == 2, True)
+                if state[y][x] != -1:
+                    game_instance.update_dots(x, y, state[y][x] == 2, True)
         game_instance.mainloop()
 
     @staticmethod

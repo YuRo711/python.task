@@ -18,7 +18,7 @@ class GridModel:
         self.last_step_loops = []
         self.taken = {GridModel.Colors.player1: [], GridModel.Colors.player2: []}
         self.logger = Logger()
-        self.logger.write(self.grid)
+        self.logger.write(self.grid, self.last_step_loops)
 
     @staticmethod
     def from_int_grid(int_grid):
@@ -46,7 +46,7 @@ class GridModel:
             if self.grid[i][j] != color:
                 self.last_changed_points_count += 1
             self.grid[i][j] = color
-        self.logger.write(self.grid)
+        self.logger.write(self.grid, self.last_step_loops)
         # self.graph = Graph(self)
 
     def filling_points(self, line, cell):
@@ -81,11 +81,9 @@ class GridModel:
             for dy in [-1, 0, 1]:
                 new_i = i + dx
                 new_j = j + dy
-                if self.is_valid_node(new_i, new_j) \
-                        and not (dx == dy == 0) \
-                        and self.grid[i][j] == self.grid[new_i][new_j] \
-                        and self.grid[i][j] != self.Colors.default:
-                    adjoining_nodes.add(self.node(new_i, new_j))
+                if self.is_valid_node(new_i, new_j) and not (dx == dy == 0):
+                    if self.grid[i][j] == self.grid[new_i][new_j] and self.grid[i][j] != self.Colors.default:
+                        adjoining_nodes.add(self.node(new_i, new_j))
         return adjoining_nodes
 
     def is_valid_node(self, i, j):
